@@ -33,24 +33,63 @@
 	syscall
 	
 	averagePairs:
-		# Calculate pair amount & summation
+# Conventions:
+# 	$t0 -> vec0
+# 	$t1 -> vec0 value
+# 	$t2 -> pairs sum|average
+# 	$t3 -> pairs amount
+		# Initialize average & counter through stack
+		addi $t2, $zero, 0
+		addi $t3, $zero, 0
+	
+		# Get initial vec0
+		la $t0, vec0($zero)
+		loop:
+			# Compare with flag then send to exitLoop
+			lw $t1, ($t0)
+			beq $t1, -9999, exitLoop
 			
+			# If not pair go to isNotPair
+			addi $a0, $t1, 0
+			addi $a1, $zero, 2
+			
+			jal divide
+			
+			bnez $v1, continue
+			
+		# Calculate pair amount & summation
+			add $t2, $t2, $t1
+			addi $t3, $zero, 1
+			
+		continue:
+			
+			addi $t0, $t0, 4
+			j loop
+
+		exitLoop:
 		# Divide summation by amount
+			addi $a0, $t2, 0
+			addi $a1, $t3, 0			
+
+			jal divide
 		
 		# Insert average at end of array
+			sw $v0, 0($t0)
+			addi $t3, $zero, -9999
+			sw $t3, 1($t0)
 		
-		addi $a0, $zero, 0
-		addi $v0, $zero, 1
-		syscall
+			# Print array			
+			la $a0, vec0($zero)
+			jal printVector
 	
 	# To this point the program is done
 	li $v0, 10
 	syscall
 	
 	replacePairsByOdds:
-		# Move vec1 1 ahead
+		# Move vec0 1 ahead
 		
-		# Loop through vec1 & replace with vec2
+		# Loop through vec0 & replace with vec1
 		
 		addi $a0, $zero, 1
 		addi $v0, $zero, 1
