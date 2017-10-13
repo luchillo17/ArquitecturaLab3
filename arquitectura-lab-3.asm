@@ -1,12 +1,13 @@
 .data 
 	questionMessage: .asciiz "Seleccionar operacion: (0) Promedio pares, (1) Remplaza impares de V2 en pares de V1:\n"
+	divErrorMessage: .asciiz "Error division por cero.\n"
 	errorMessage: .asciiz "Error, ingrese 0 o 1.\n"
-	vec1: .word 3, 1, 2, 4, 7, 6, -9999
+	vec0: .word 3, 1, 2, 4, 7, 6, -9999
 	
-	vec2: .word 9, 4, 7, 5, 3, 2, 8, 6, -9999
+	vec1: .word 9, 4, 7, 5, 3, 2, 8, 6, -9999
 	
 .text
-	main:
+	main:		
 		# Print question for user input
 		la $a0, questionMessage
 		addi $v0, $zero, 4
@@ -33,7 +34,7 @@
 	
 	averagePairs:
 		# Calculate pair amount & summation
-		
+			
 		# Divide summation by amount
 		
 		# Insert average at end of array
@@ -71,6 +72,36 @@
 		
 		# Acumulador
 		add $t4, $a0, $zero
+		
+		# Negative flag
+		addi $t6, $zero, 1
+		
+		# Invert if arg 1 is negative
+		slt $t7, $a0, $zero
+		beqz $t7, positive1
+		
+		mul $a0, $a0, -1
+		mul $t6, $t6, -1
+		
+		positive1:
+			# Invert if arg 2 is negative
+			slt $t7, $a1, $zero
+			beqz $t7, positive2
+		
+			mul $a1, $a1, -1
+			mul $t6, $t6, -1
+		
+		positive2:
+		
+		# 0 division error
+		bnez $a1, integer
+		
+		divError:
+			addi $v0, $zero, 55
+			addi $a1, $zero, 0
+			la $a0, divErrorMessage
+			syscall
+		
 		integer: 			
 			sge $t5, $t4, $a1 			
 			beq $t5, $zero, decimal 
@@ -82,6 +113,7 @@
 			j integer
 			
 		decimal:  	
+			addi $v1, $t4, 0 # Modulo
 			mul $t4, $t4, 10
 			
 		float:
@@ -102,5 +134,9 @@
 			addi $t0, $t0, 1
 			
 		divReturn:
+			# Use flag to calculate sign of result
+			mul $t0, $t0, $t6
+			
+			# Output
 			addi $v0, $t0, 0
 			jr $ra
