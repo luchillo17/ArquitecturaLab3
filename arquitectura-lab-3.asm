@@ -44,10 +44,10 @@
 	
 		# Get initial vec0
 		la $t0, vec0($zero)
-		loop:
+		loopAverage:
 			# Compare with flag then send to exitLoop
-			lw $t1, ($t0)
-			beq $t1, -9999, exitLoop
+			lw $t1, 0($t0)
+			beq $t1, -9999, exitLoopAverage
 			
 			# If not pair go to isNotPair
 			addi $a0, $t1, 0
@@ -55,29 +55,29 @@
 			
 			jal divide
 			
-			bnez $v1, continue
+			bnez $v1, continueAverage # Module 0 means is pair, so if not continue
 			
-		# Calculate pair amount & summation
+			# Calculate pair amount & summation
 			add $t2, $t2, $t1
 			addi $t3, $zero, 1
 			
-		continue:
+		continueAverage:
 			
 			addi $t0, $t0, 4
-			j loop
+			j loopAverage
 
-		exitLoop:
-		# Divide summation by amount
+		exitLoopAverage:
+			# Divide summation by amount
 			addi $a0, $t2, 0
 			addi $a1, $t3, 0			
 
 			jal divide
-		
-		# Insert average at end of array
+			
+			# Insert average at end of array
 			sw $v0, 0($t0)
 			addi $t3, $zero, -9999
 			sw $t3, 1($t0)
-		
+			
 			# Print array			
 			la $a0, vec0($zero)
 			jal printVector
@@ -98,6 +98,21 @@
 	# To this point the program is done
 	li $v0, 10
 	syscall
+	
+	printVector:
+		loopPrint:
+			# Compare with flag then send to exitLoop
+			lw $a0, ($a0)
+			beq $a0, -9999, exitLoopPrint
+			
+			addi $v0, $zero, 1
+			syscall
+			
+			addi $a0, $a0, 4
+			j loopPrint
+
+		exitLoopPrint:
+			jr $ra
 	
 	divide: 		
 		# Numero entero 		
@@ -151,9 +166,9 @@
 			
 			j integer
 			
-		decimal:  	
+		decimal:
 			addi $v1, $t4, 0 # Modulo
-			mul $t4, $t4, 10
+			mul  $t4, $t4, 10
 			
 		float:
 			
@@ -167,12 +182,6 @@
 			j float
 						 				 		
 		divEnd: 
-			sge $t0, $t1, 5
-			beq $t0, $zero, divReturn
-			
-			addi $t0, $t0, 1
-			
-		divReturn:
 			# Use flag to calculate sign of result
 			mul $t0, $t0, $t6
 			
