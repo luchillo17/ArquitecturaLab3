@@ -117,9 +117,9 @@
 		la $t1, vec1($zero)
 		
 		# Move vec0 1 ahead & test vec1 position
-		lw $t2, 0($t0)
+		lw $t2, 0($t1)
 		beq $t2, -9999, exitReplace
-		addi $t0, $t0, 4
+		addi $t1, $t1, 4
 		
 		addi $t4, $zero, 1
 		
@@ -242,30 +242,17 @@
 		
 		integer: 			
 			sge $t5, $t4, $a1 			
-			beq $t5, $zero, decimal 
-			
-			# Substraer y contar
-			sub  $t4, $t4, $a1
-			addi $t0, $t0, 1		
-			
-			j integer
-			
-		decimal:
-			addi $v1, $t4, 0 # Modulo
-			mul  $t4, $t4, 10
-			
-		float:
-			
-			sge $t5, $t4, $a1 			
 			beq $t5, $zero, divEnd 
 			
 			# Substraer y contar
-			sub $t4, $t4, $a1
-			addi $t1, $t1, 1
-				
-			j float
+			sub  $t4, $t4, $a1
+			addi $t0, $t0, 1
+			
+			j integer
 						 				 		
 		divEnd: 
+			addi $v1, $t4, 0 # Modulo
+			
 			# Use flag to calculate sign of result
 			mul $t0, $t0, $t6
 			
