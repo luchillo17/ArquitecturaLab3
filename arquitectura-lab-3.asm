@@ -38,12 +38,20 @@
 # 	$t1 -> vec0 value
 # 	$t2 -> pairs sum|average
 # 	$t3 -> pairs amount
+
+		# Save in stack the previous values of t(0..3)
+		addi $sp, $sp, -16
+		sw $t0, 0($sp)
+		sw $t1, 4($sp)
+		sw $t2, 8($sp)
+		sw $t3, 12($sp)
 		# Initialize average & counter through stack
 		addi $t2, $zero, 0
 		addi $t3, $zero, 0
 	
 		# Get initial vec0
 		la $t0, vec0($zero)
+		
 		loopAverage:
 			# Compare with flag then send to exitLoop
 			lw $t1, 0($t0)
@@ -59,7 +67,7 @@
 			
 			# Calculate pair amount & summation
 			add $t2, $t2, $t1
-			addi $t3, $zero, 1
+			addi $t3, $t3, 1
 			
 		continueAverage:
 			
@@ -76,11 +84,18 @@
 			# Insert average at end of array
 			sw $v0, 0($t0)
 			addi $t3, $zero, -9999
-			sw $t3, 1($t0)
+			sw $t3, 4($t0)
 			
 			# Print array			
 			la $a0, vec0($zero)
 			jal printVector
+
+		# Load previous values of t(0..3) & release stack
+		lw $t0, 0($sp)
+		lw $t1, 4($sp)
+		lw $t2, 8($sp)
+		lw $t3, 12($sp)
+		addi $sp, $sp, 16
 	
 	# To this point the program is done
 	li $v0, 10
@@ -100,21 +115,42 @@
 	syscall
 	
 	printVector:
+		# Save in stack the previous values of t0
+		addi $sp, $sp, -4
+		sw $t0, 0($sp)
+		
+		addi $t0, $a0, 0
 		loopPrint:
 			# Compare with flag then send to exitLoop
-			lw $a0, ($a0)
+			lw $a0, 0($t0)
 			beq $a0, -9999, exitLoopPrint
 			
 			addi $v0, $zero, 1
 			syscall
 			
-			addi $a0, $a0, 4
+			addi $t0, $t0, 4
 			j loopPrint
 
 		exitLoopPrint:
+		
+			# Load previous values of t0 & release stack
+			lw $t0, 0($sp)
+			addi $sp, $sp, 4
+			
 			jr $ra
 	
-	divide: 		
+	divide:
+		# Save in stack the previous values of t(0..7)
+		addi $sp, $sp, -32
+		sw $t0, 0($sp)
+		sw $t1, 4($sp)
+		sw $t2, 8($sp)
+		sw $t3, 12($sp)
+		sw $t4, 16($sp)
+		sw $t5, 20($sp)
+		sw $t6, 24($sp)
+		sw $t7, 28($sp)
+		
 		# Numero entero 		
 		add  $t0, $zero, $zero
 		# Numero decimal 		
@@ -187,4 +223,17 @@
 			
 			# Output
 			addi $v0, $t0, 0
+			
+			# Load previous values of t(0..7) & release stack
+
+			lw $t0, 0($sp)
+			lw $t1, 4($sp)
+			lw $t2, 8($sp)
+			lw $t3, 12($sp)
+			lw $t4, 16($sp)
+			lw $t5, 20($sp)
+			lw $t6, 24($sp)
+			lw $t7, 28($sp)
+			addi $sp, $sp, 32
+			
 			jr $ra
