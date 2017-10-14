@@ -1,6 +1,7 @@
 .data 
 	questionMessage: .asciiz "Seleccionar operacion: (0) Promedio pares, (1) Remplaza impares de V2 en pares de V1:\n"
 	divErrorMessage: .asciiz "Error division por cero.\n"
+	spaceMessage: .asciiz " "
 	errorMessage: .asciiz "Error, ingrese 0 o 1.\n"
 	vec0: .word 3, 1, 2, 4, 7, 6, -9999
 	
@@ -116,8 +117,9 @@
 	
 	printVector:
 		# Save in stack the previous values of t0
-		addi $sp, $sp, -4
+		addi $sp, $sp, -8
 		sw $t0, 0($sp)
+		sw $ra, 4($sp)
 		
 		addi $t0, $a0, 0
 		loopPrint:
@@ -128,6 +130,8 @@
 			addi $v0, $zero, 1
 			syscall
 			
+			jal printSpace
+			
 			addi $t0, $t0, 4
 			j loopPrint
 
@@ -135,7 +139,8 @@
 		
 			# Load previous values of t0 & release stack
 			lw $t0, 0($sp)
-			addi $sp, $sp, 4
+			lw $ra, 4($sp)
+			addi $sp, $sp, 8
 			
 			jr $ra
 	
@@ -237,3 +242,18 @@
 			addi $sp, $sp, 32
 			
 			jr $ra
+	
+	printSpace:
+		# Save in stack the previous values of a0
+		addi $sp, $sp, -4
+		sw $a0, 0($sp)
+		
+		la $a0, spaceMessage
+		addi $v0, $zero, 4
+		syscall
+		
+		# Load previous values of a0 & release stack
+		lw $a0, 0($sp)
+		addi $sp, $sp, 4
+		
+		jr $ra
